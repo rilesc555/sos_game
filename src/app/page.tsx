@@ -1,111 +1,85 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import GameBoard from '../components/GameBoard';
+import GameOptions from '../components/GameOptions';
+import { SOSGame } from '../game/SOSGame';
+import GameBoardPreview from '../components/GameBoardPreview';
 
-function Radio_box() {
-
-  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedOption(event.target.value);
-  };
-
-  const [selectedOption, setSelectedOption] = useState<string>('');
-  return (
-      <div className="text-black">
-        <div>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              className="form-radio"
-              name="option"
-              value="option1"
-              checked={selectedOption === 'option1'}
-              onChange={handleRadioChange}
-            />
-            <span className="ml-2">Easy</span>
-          </label>
-        </div>
-        <div>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              className="form-radio"
-              name="option"
-              value="option2"
-              checked={selectedOption === 'option2'}
-              onChange={handleRadioChange}
-            />
-            <span className="ml-2">Medium</span>
-          </label>
-        </div>
-        <div>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              className="form-radio"
-              name="option"
-              value="option3"
-              checked={selectedOption === 'option3'}
-              onChange={handleRadioChange}
-            />
-            <span className="ml-2">Hard</span>
-          </label>
-        </div>
-      </div>
-  );
-}
-
-function Header() {
-  return (
-    <header className="bg-gray-800 text-white p-4">
-      <h1 className="text-2xl">SOS Game</h1>
-    </header>
-  );
-}
-
-function Game_grid() {
-  return (
-    <div className="grid grid-cols-3">
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-      <div className="p-4 border-2 border-black"></div>
-    </div>
-  );
-}
- 
 export default function App() {
+  // Game state
+  const [gameState, setGameState] = useState(null);
+  const [boardSize, setBoardSize] = useState(6);
+  const [gameMode, setGameMode] = useState('simple');
+  const [currentPlayer, setCurrentPlayer] = useState(1); // 1 or 2
+  const [selectedLetter, setSelectedLetter] = useState('S');
+  const [gameStarted, setGameStarted] = useState(false);
 
-  const [isChecked, setIsChecked] = useState<boolean>(false);
+  useEffect(() => {
+    if (gameStarted) {
+      const game = new SOSGame(boardSize, gameMode);
+      setGameState(game);
+    }
+  }, [gameStarted, boardSize, gameMode]);
 
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(event.target.checked);
+  // Handle cell click for placing S or O
+  const handleCellClick = (row, col) => {
+    if (!gameState || gameState.getCell(row, col) !== '') return;
+    
+    gameState.placeMove(row, col, selectedLetter, currentPlayer);
+    setGameState({ ...gameState }); // Trigger re-render
+    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+  };
+
+  // Start new game
+  const startGame = () => {
+    setGameStarted(true);
+  };
+
+  // Reset game
+  const resetGame = () => {
+    setGameStarted(false);
+    setGameState(null);
+    setCurrentPlayer(1);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="grid items-center justify-center">
-      <Header />
-      <Game_grid />
-      <div className="grid grid-cols-1 gap-4 p-6 bg-white rounded shadow-md">
-        <Radio_box />
-        <div>
-          <label className="inline-flex items-center text-black">
-            <input
-              type="checkbox"
-              className="form-checkbox"
-              checked={isChecked}
-              onChange={handleCheckboxChange}
+    <div className="container mx-auto p-4 max-w-5xl">
+      <h1 className="text-4xl font-bold text-center mb-6">SOS Game</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="col-span-1 bg-gray-100 p-4 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4">Game Options</h2>
+          <GameOptions 
+            boardSize={boardSize}
+            setBoardSize={setBoardSize}
+            gameMode={gameMode}
+            setGameMode={setGameMode}
+            currentPlayer={currentPlayer}
+            selectedLetter={selectedLetter}
+            setSelectedLetter={setSelectedLetter}
+            gameStarted={gameStarted}
+            startGame={startGame}
+            resetGame={resetGame}
+          />
+        </div>
+        
+        <div className="col-span-1 md:col-span-2 bg-white p-4 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">Game Board</h2>
+          {gameStarted && gameState ? (
+            <GameBoard 
+              boardSize={boardSize}
+              gameState={gameState}
+              handleCellClick={handleCellClick}
             />
-            <span className="ml-2">Save Game</span>
-          </label>
+          ) : (
+            <div className="flex flex-col items-center">
+              <p className="text-xl font-semibold mb-4">Preview (game not started)</p>
+              <GameBoardPreview boardSize={boardSize} />
+            </div>
+          )}
         </div>
       </div>
-      </div>
-    </div>
+</div>
   );
 }
