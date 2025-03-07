@@ -73,4 +73,4 @@ export class SOSGame {
       return 0; // Draw
     }
   }
-}+1
+}
