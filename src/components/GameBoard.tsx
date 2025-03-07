@@ -32,7 +32,7 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
               style={{ width: `${cellSizePx}px`, height: `${cellSizePx}px` }}
               onClick={() => handleCellClick(rowIndex, colIndex)}
             >
-              <span className="text-2xl font-bold">
+              <span className="text-2xl font-bold text-gray-700">
                 {cell}
               </span>
             </div>

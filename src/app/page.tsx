@@ -8,7 +8,7 @@ import GameBoardPreview from '../components/GameBoardPreview';
 
 export default function App() {
   // Game state
-  const [gameState, setGameState] = useState(null);
+  const [gameState, setGameState] = useState<SOSGame | null>(null);
   const [boardSize, setBoardSize] = useState(6);
   const [gameMode, setGameMode] = useState('simple');
   const [currentPlayer, setCurrentPlayer] = useState(1); // 1 or 2
@@ -27,7 +27,7 @@ export default function App() {
     if (!gameState || gameState.getCell(row, col) !== '') return;
     
     gameState.placeMove(row, col, selectedLetter, currentPlayer);
-    setGameState({ ...gameState }); // Trigger re-render
+    setGameState(Object.assign(new SOSGame(boardSize, gameMode), gameState));
     setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
   };
 
@@ -45,11 +45,11 @@ export default function App() {
 
   return (
     <div className="container mx-auto p-4 max-w-5xl">
-      <h1 className="text-4xl font-bold text-center mb-6">SOS Game</h1>
+      <h1 className="text-5xl font-black text-center mb-6 text-gray-800">SOS Game</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="col-span-1 bg-gray-100 p-4 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Game Options</h2>
+        <div className="col-span-1 bg-gray-100 p-6 rounded-lg border-2 border-gray-300">
+          <h2 className="text-3xl font-bold mb-4 text-gray-800">Game Options</h2>
           <GameOptions 
             boardSize={boardSize}
             setBoardSize={setBoardSize}
@@ -64,8 +64,8 @@ export default function App() {
           />
         </div>
         
-        <div className="col-span-1 md:col-span-2 bg-white p-4 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">Game Board</h2>
+        <div className="col-span-1 md:col-span-2 bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200">
+          <h2 className="text-3xl font-bold mb-4 text-gray-800">Game Board</h2>
           {gameStarted && gameState ? (
             <GameBoard 
               boardSize={boardSize}
@@ -74,12 +74,12 @@ export default function App() {
             />
           ) : (
             <div className="flex flex-col items-center">
-              <p className="text-xl font-semibold mb-4">Preview (game not started)</p>
+              <p className="text-2xl font-bold mb-4 text-gray-800">Preview (game not started)</p>
               <GameBoardPreview boardSize={boardSize} />
             </div>
           )}
         </div>
       </div>
-</div>
+    </div>
   );
 }

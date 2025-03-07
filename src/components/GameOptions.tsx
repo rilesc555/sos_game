@@ -52,7 +52,7 @@ const GameOptions = ({
 
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Game Mode</label>
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 text-gray-700">
           <label className="flex items-center">
             <input
               type="radio"
@@ -83,13 +83,13 @@ const GameOptions = ({
       {gameStarted && (
         <>
           <div className="p-3 bg-blue-100 rounded-lg">
-            <p className="font-bold">Current Player: {currentPlayer}</p>
+            <p className="font-bold text-gray-700">Current Player: {currentPlayer}</p>
           </div>
           
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Select Letter</label>
             <div className="flex space-x-4">
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-700">
                 <input
                   type="radio"
                   name="selectedLetter"
@@ -100,7 +100,7 @@ const GameOptions = ({
                 />
                 <span className="text-xl font-bold">S</span>
               </label>
-              <label className="flex items-center">
+              <label className="flex items-center text-gray-700">
                 <input
                   type="radio"
                   name="selectedLetter"
