@@ -23,7 +23,7 @@ export default function App() {
   }, [gameStarted, boardSize, gameMode]);
 
   // Handle cell click for placing S or O
-  const handleCellClick = (row, col) => {
+  const handleCellClick = (row: number, col: number) => {
     if (!gameState || gameState.getCell(row, col) !== '') return;
     
     gameState.placeMove(row, col, selectedLetter, currentPlayer);
