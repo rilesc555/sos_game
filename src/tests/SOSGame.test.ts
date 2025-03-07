@@ -1,3 +1,5 @@
+import { expect, test, describe } from "bun:test";
+
 import { SOSGame } from '../game/SOSGame';
 
 describe('SOSGame', () => {
