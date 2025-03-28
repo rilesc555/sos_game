@@ -82,7 +82,7 @@ const GameOptions = ({
 
       {gameStarted && (
         <>
-          <div className="p-3 bg-blue-100 rounded-lg">
+          <div className={`p-3 ${currentPlayer === 1 ? 'bg-blue-100' : 'bg-red-100'} rounded-lg`}>
             <p className="font-bold text-gray-700">Current Player: {currentPlayer}</p>
           </div>
           

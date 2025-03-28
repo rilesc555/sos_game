@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import GameBoard from '../components/GameBoard';
 import GameOptions from '../components/GameOptions';
 import { SOSGame } from '../game/SOSGame';
@@ -19,29 +19,54 @@ export default function App() {
     if (gameStarted) {
       const game = new SOSGame(boardSize, gameMode);
       setGameState(game);
+      setCurrentPlayer(1);
     }
   }, [gameStarted, boardSize, gameMode]);
 
-  // Handle cell click for placing S or O
-  const handleCellClick = (row: number, col: number) => {
+  // Handle cell click for placing S or O. Now with callbacks!
+  const handleCellClick = useCallback((row: number, col: number) => {
     if (!gameState || gameState.getCell(row, col) !== '') return;
     
-    gameState.placeMove(row, col, selectedLetter, currentPlayer);
-    setGameState(Object.assign(new SOSGame(boardSize, gameMode), gameState));
-    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
-  };
+    const moveSuccess = gameState.placeMove(row, col, selectedLetter, currentPlayer);
+    if (moveSuccess) {
+      // Create a new instance to trigger re-render
+      const newGameState = gameState.clone();
+      setGameState(newGameState);
+      
+      // If a player makes an SOS, they get another turn (except in simple mode)
+      if (newGameState.getLastMoveScore() === 0 || gameMode === 'simple') {
+        setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+      }
+    }
+  }, [gameState, selectedLetter, currentPlayer, gameMode]);
 
   // Start new game
-  const startGame = () => {
+  const startGame = useCallback(() => {
     setGameStarted(true);
-  };
+  }, []);
 
   // Reset game
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     setGameStarted(false);
     setGameState(null);
     setCurrentPlayer(1);
-  };
+    setSelectedLetter('S');
+  }, []);
+
+  // Board size handler
+  const handleBoardSizeChange = useCallback((size: number) => {
+    setBoardSize(size);
+  }, []);
+
+  // Game mode handler
+  const handleGameModeChange = useCallback((mode: string) => {
+    setGameMode(mode);
+  }, []);
+
+  // Letter selection handler
+  const handleLetterSelect = useCallback((letter: string) => {
+    setSelectedLetter(letter);
+  }, []);
 
   return (
     <div className="container mx-auto p-4 max-w-5xl">
@@ -52,12 +77,12 @@ export default function App() {
           <h2 className="text-3xl font-bold mb-4 text-gray-800">Game Options</h2>
           <GameOptions 
             boardSize={boardSize}
-            setBoardSize={setBoardSize}
+            setBoardSize={handleBoardSizeChange}
             gameMode={gameMode}
-            setGameMode={setGameMode}
+            setGameMode={handleGameModeChange}
             currentPlayer={currentPlayer}
             selectedLetter={selectedLetter}
-            setSelectedLetter={setSelectedLetter}
+            setSelectedLetter={handleLetterSelect}
             gameStarted={gameStarted}
             startGame={startGame}
             resetGame={resetGame}
