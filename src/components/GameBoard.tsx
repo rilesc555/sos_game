@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { SOSGame } from '../game/SOSGame';
 
 type GameBoardProps = {
@@ -18,9 +18,39 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
   const winner = gameState.getWinner();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
+  // State to control animation
+  const [animatePlayer, setAnimatePlayer] = useState<number | null>(null);
+  const [animationType, setAnimationType] = useState<'single' | 'double' | null>(null);
+  const [animationKey, setAnimationKey] = useState<number>(0);
+  
   // Calculate cell size based on board dimensions
   const cellSizePx = Math.min(60, 480 / boardSize);
   const boardSizePx = cellSizePx * boardSize;
+
+  // Handle SOS formations and trigger appropriate animation
+  useEffect(() => {
+    if (lastMoveScore > 0 && !gameState.isSosMessageShown()) {
+      console.log("Triggering animation for player", currentPlayer, "with score", lastMoveScore);
+      
+      // Determine which animation to use based on number of SOS sequences
+      const animType = lastMoveScore === 1 ? 'single' : 'double';
+      
+      setAnimatePlayer(currentPlayer);
+      setAnimationType(animType);
+      setAnimationKey(Date.now());
+      
+      // Mark animation as shown
+      gameState.setSosMessageShown();
+      
+      // Reset animation after it completes
+      const timer = setTimeout(() => {
+        setAnimatePlayer(null);
+        setAnimationType(null);
+      }, animType === 'single' ? 600 : 1100); // Allow extra time for double animation
+      
+      return () => clearTimeout(timer);
+    }
+  }, [lastMoveScore, gameState, currentPlayer]);
 
   // Draw SOS lines. This was weird
   useEffect(() => {
@@ -59,28 +89,56 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
     });
   }, [gameState, cellSizePx]);
 
+  // Define animation styles as objects
+  const singlePulseStyle = {
+    animation: 'score-pulse-single 0.5s ease-in-out',
+    boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.7)'
+  };
+
+  const doublePulseStyle = {
+    animation: 'score-pulse-double 1s ease-in-out',
+    boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.7)'
+  };
+
+  // Helper to get the correct animation class
+  const getAnimationClass = (playerNum: number) => {
+    if (animatePlayer !== playerNum || !animationType) return '';
+    return `animate-score-pulse-${animationType}`;
+  };
+
+  // Helper to get animation style
+  const getAnimationStyle = (playerNum: number) => {
+    if (animatePlayer !== playerNum || !animationType) return {};
+    return animationType === 'single' ? singlePulseStyle : doublePulseStyle;
+  };
+
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div className="flex justify-between w-full max-w-md px-4">
-        <div className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
-          ${currentPlayer === 1 
-            ? 'text-blue-600 bg-blue-50 border-2 border-blue-200' 
-            : 'text-gray-600'}`}>
-          Player 1: {player1Score}
+      <div className="flex justify-between items-center w-full max-w-md px-4">
+        <div 
+          key={animatePlayer === 1 ? `p1-animate-${animationKey}` : 'p1-static'}
+          className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
+            ${currentPlayer === 1 
+              ? 'text-blue-600 bg-blue-50 border-2 border-blue-200' 
+              : 'text-gray-600'}
+            ${getAnimationClass(1)}`}
+          style={getAnimationStyle(1)}
+        >
+          Player 1: {player1Score} {animatePlayer === 1}
         </div>
-        <div className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
-          ${currentPlayer === 2 
-            ? 'text-red-600 bg-red-50 border-2 border-red-200' 
-            : 'text-gray-600'}`}>
-          Player 2: {player2Score}
+        
+        <div 
+          key={animatePlayer === 2 ? `p2-animate-${animationKey}` : 'p2-static'}
+          className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
+            ${currentPlayer === 2 
+              ? 'text-red-600 bg-red-50 border-2 border-red-200' 
+              : 'text-gray-600'}
+            ${getAnimationClass(2)}`}
+          style={getAnimationStyle(2)}
+        >
+          Player 2: {player2Score} {animatePlayer === 2}
         </div>
       </div>
-
-      {lastMoveScore > 0 && (
-        <div className="text-green-600 font-bold">
-          +{lastMoveScore} SOS formed!
-        </div>
-      )}
 
       <div className="relative">
         <canvas
@@ -103,7 +161,11 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
                 className={`flex items-center justify-center bg-white rounded cursor-pointer 
                   ${!isGameOver && !cell ? 'hover:bg-blue-100' : ''} transition-colors`}
                 style={{ width: `${cellSizePx}px`, height: `${cellSizePx}px` }}
-                onClick={() => !isGameOver && handleCellClick(rowIndex, colIndex)}
+                onClick={() => {
+                  if (!isGameOver && handleCellClick) {
+                    handleCellClick(rowIndex, colIndex);
+                  }
+                }}
               >
                 <span className="text-2xl font-bold text-gray-700">
                   {cell}

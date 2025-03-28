@@ -11,6 +11,7 @@ export class SOSGame {
     end: [number, number];
     player: number;
   }[];
+  private sosMessageShown: boolean;
 
   constructor(boardSize: number, gameMode: string) {
     this.boardSize = boardSize;
@@ -20,6 +21,7 @@ export class SOSGame {
     this.lastMoveScore = 0;
     this.gameOver = false;
     this.sosSequences = [];
+    this.sosMessageShown = false;
 
     // Initialize the empty board
     this.board = Array(boardSize)
@@ -149,6 +151,7 @@ export class SOSGame {
     }
 
     this.board[row][col] = letter;
+    this.sosMessageShown = false;
 
     // Check for SOS formations and update score
     this.lastMoveScore = this.checkSOS(row, col);
@@ -243,6 +246,16 @@ export class SOSGame {
     return this.sosSequences;
   }
 
+  // Check if SOS message has been shown for the current move
+  public isSosMessageShown(): boolean {
+    return this.sosMessageShown;
+  }
+
+  // Mark SOS message as shown
+  public setSosMessageShown(): void {
+    this.sosMessageShown = true;
+  }
+
   // Clone the current game state
   public clone(): SOSGame {
     const newGame = new SOSGame(this.boardSize, this.gameMode);
@@ -251,7 +264,8 @@ export class SOSGame {
     newGame.playerScores = [...this.playerScores];
     newGame.lastMoveScore = this.lastMoveScore;
     newGame.gameOver = this.gameOver;
-    newGame.sosSequences = [...this.sosSequences];
+    newGame.sosSequences = this.sosSequences.map(seq => ({...seq}));
+    newGame.sosMessageShown = this.sosMessageShown;
     return newGame;
   }
 }
