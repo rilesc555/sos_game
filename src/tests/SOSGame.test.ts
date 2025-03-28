@@ -231,7 +231,7 @@ describe('SOSGame', () => {
       
       // Player 1 makes an SOS
       game.placeMove(0, 0, 'S', 1);
-      game.placeMove(0, 1, 'O', 1);
+      game.placeMove(0, 1, 'O', 2);
       game.placeMove(0, 2, 'S', 1);
       
       // Player 1 should get another turn
@@ -259,16 +259,16 @@ describe('SOSGame', () => {
       
       // Set up board for multiple SOS
       game.placeMove(2, 1, 'S', 1);
-      game.placeMove(2, 3, 'S', 1);
+      game.placeMove(2, 3, 'S', 2);
       game.placeMove(1, 2, 'S', 1);
-      game.placeMove(3, 2, 'S', 1);
+      game.placeMove(3, 2, 'S', 2);
       
       // Place O in center to form 4 SOS patterns
       game.placeMove(2, 2, 'O', 1);
       
-      expect(game.getLastMoveScore()).toBe(4);
+      expect(game.getLastMoveScore()).toBe(2);
       const [p1Score] = game.getScores();
-      expect(p1Score).toBe(4);
+      expect(p1Score).toBe(2);
     });
   });
 });

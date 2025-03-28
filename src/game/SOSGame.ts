@@ -43,49 +43,77 @@ export class SOSGame {
   private checkSOS(row: number, col: number): number {
     const letter = this.board[row][col];
     let sosCount = 0;
-    
+
     // Define all possible directions to check
     const directions = [
-      [0, 1],   // horizontal
-      [1, 0],   // vertical
-      [1, 1],   // diagonal down-right
-      [1, -1],  // diagonal down-left
-      [-1, 1],  // diagonal up-right
-      [-1, -1], // diagonal up-left
-      [0, -1],  // horizontal left
-      [-1, 0],  // vertical up
+      [0, 1], // horizontal
+      [1, 0], // vertical
+      [1, 1], // diagonal down-right
+      [1, -1], // diagonal down-left
     ];
-
+    // For each direction, check if the placed letter forms part of an SOS
     for (const [dr, dc] of directions) {
-      // Check if current position can be part of an SOS
-      if (letter === 'S') {
-        // Check if S is the start of SOS
-        if (row + 2*dr >= 0 && row + 2*dr < this.boardSize &&
-            col + 2*dc >= 0 && col + 2*dc < this.boardSize) {
-          if (this.board[row + dr][col + dc] === 'O' &&
-              this.board[row + 2*dr][col + 2*dc] === 'S') {
+      if (letter === "S") {
+        // Check if S is the start of SOS (look forward)
+        if (
+          row + 2 * dr >= 0 &&
+          row + 2 * dr < this.boardSize &&
+          col + 2 * dc >= 0 &&
+          col + 2 * dc < this.boardSize
+        ) {
+          if (
+            this.board[row + dr][col + dc] === "O" &&
+            this.board[row + 2 * dr][col + 2 * dc] === "S"
+          ) {
             sosCount++;
             this.sosSequences.push({
               start: [row, col],
-              end: [row + 2*dr, col + 2*dc],
-              player: this.currentPlayer
+              end: [row + 2 * dr, col + 2 * dc],
+              player: this.currentPlayer,
             });
           }
         }
-      } else if (letter === 'O') {
-        // Check both directions for each axis when O is placed
-        // Check forward direction
-        if (row - dr >= 0 && row - dr < this.boardSize &&
-            col - dc >= 0 && col - dc < this.boardSize &&
-            row + dr >= 0 && row + dr < this.boardSize &&
-            col + dc >= 0 && col + dc < this.boardSize) {
-          if (this.board[row - dr][col - dc] === 'S' &&
-              this.board[row + dr][col + dc] === 'S') {
+
+        // Check if S is the end of SOS (look backward)
+        if (
+          row - 2 * dr >= 0 &&
+          row - 2 * dr < this.boardSize &&
+          col - 2 * dc >= 0 &&
+          col - 2 * dc < this.boardSize
+        ) {
+          if (
+            this.board[row - dr][col - dc] === "O" &&
+            this.board[row - 2 * dr][col - 2 * dc] === "S"
+          ) {
+            sosCount++;
+            this.sosSequences.push({
+              start: [row - 2 * dr, col - 2 * dc],
+              end: [row, col],
+              player: this.currentPlayer,
+            });
+          }
+        }
+      } else if (letter === "O") {
+        // Check if O is in the middle of SOS
+        if (
+          row - dr >= 0 &&
+          row - dr < this.boardSize &&
+          col - dc >= 0 &&
+          col - dc < this.boardSize &&
+          row + dr >= 0 &&
+          row + dr < this.boardSize &&
+          col + dc >= 0 &&
+          col + dc < this.boardSize
+        ) {
+          if (
+            this.board[row - dr][col - dc] === "S" &&
+            this.board[row + dr][col + dc] === "S"
+          ) {
             sosCount++;
             this.sosSequences.push({
               start: [row - dr, col - dc],
               end: [row + dr, col + dc],
-              player: this.currentPlayer
+              player: this.currentPlayer,
             });
           }
         }
@@ -94,6 +122,7 @@ export class SOSGame {
 
     return sosCount;
   }
+  // Ensure the move is being made by the correct player
 
   // Place a move on the board
   public placeMove(
@@ -102,6 +131,7 @@ export class SOSGame {
     letter: string,
     player: number
   ): boolean {
+
     if (this.gameOver) {
       return false;
     }
@@ -131,6 +161,11 @@ export class SOSGame {
         return true;
       }
       // In general mode, player keeps their turn after forming an SOS
+      // But still check if board is full
+      if (this.isBoardFull()) {
+        this.gameOver = true;
+        return true;
+      }
       return true;
     }
 
@@ -140,6 +175,7 @@ export class SOSGame {
     // Check if game is over
     if (this.isBoardFull()) {
       this.gameOver = true;
+      return true;
     }
 
     return true;
