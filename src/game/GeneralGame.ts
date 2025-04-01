@@ -1,6 +1,7 @@
+import { SOSGame } from "./SOSGame";
 export class GeneralGame extends SOSGame {
     constructor(boardSize: number) {
-        super(boardSize, "General");
+        super(boardSize, "general");
     }
 
     public placeMove(
@@ -38,13 +39,10 @@ export class GeneralGame extends SOSGame {
         if (this.lastMoveScore) {
             this.playerScores[player - 1] += this.lastMoveScore;
         } else {
-            this.currentPlayer = player === 1 ? 2 : 1;
-        }
-
-        // Check if game is over
-        if (this.isBoardFull()) {
-            this.gameOver = true;
-            return true;
+            if (this.isBoardFull()) {
+                this.gameOver = true;
+            }
+            else {this.currentPlayer = player === 1 ? 2 : 1;}
         }
         return true;
     }

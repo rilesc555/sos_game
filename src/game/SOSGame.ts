@@ -1,4 +1,4 @@
-abstract class SOSGame {
+export abstract class SOSGame {
     protected board: string[][];
     protected boardSize: number;
     protected gameMode: string;

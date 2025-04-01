@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useRef, useEffect, useState } from 'react';
-import { SOSGame } from '../game/SOSGame';
+import { GeneralGame } from 'game/GeneralGame'
+import { SimpleGame } from 'game/SimpleGame';
 
 type GameBoardProps = {
   boardSize: number;

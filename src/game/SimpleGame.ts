@@ -1,6 +1,7 @@
+import { SOSGame } from "./SOSGame";
 export class SimpleGame extends SOSGame {
     constructor(boardSize: number) {
-        super(boardSize, "Simple");
+        super(boardSize, "simple");
     }
 
     public placeMove(

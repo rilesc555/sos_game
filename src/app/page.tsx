@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import GameBoard from '../components/GameBoard';
 import GameOptions from '../components/GameOptions';
-import { SOSGame } from '../game/SOSGame';
+import { SOSGame } from 'game/SOSGame';
+import { GeneralGame } from 'game/GeneralGame';
+import { SimpleGame } from 'game/SimpleGame';
 import GameBoardPreview from '../components/GameBoardPreview';
 
 export default function App() {
@@ -17,7 +19,7 @@ export default function App() {
 
   useEffect(() => {
     if (gameStarted) {
-      const game = new SOSGame(boardSize, gameMode);
+      const game = gameMode === 'general' ? new GeneralGame(boardSize) : new SimpleGame(boardSize);
       setGameState(game);
       setCurrentPlayer(1);
     }
