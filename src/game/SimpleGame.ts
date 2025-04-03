@@ -1,7 +1,9 @@
 import { SOSGame } from "./SOSGame";
+import { Player } from "./Player";
+
 export class SimpleGame extends SOSGame {
-    constructor(boardSize: number) {
-        super(boardSize, "simple");
+    constructor(boardSize: number, player1: Player, player2: Player) {
+        super(boardSize, "simple", player1, player2);
     }
 
     public placeMove(
@@ -36,8 +38,9 @@ export class SimpleGame extends SOSGame {
 
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
-        if (this.lastMoveScore) {
+        if (this.lastMoveScore > 0) {
             this.playerScores[player - 1] += this.lastMoveScore;
+            // In simple mode, game ends when an SOS is formed
             this.gameOver = true;
             return true;
         }
@@ -48,24 +51,25 @@ export class SimpleGame extends SOSGame {
         // Check if game is over
         if (this.isBoardFull()) {
             this.gameOver = true;
-            return true;
         }
+
         return true;
     }
 
     // Check if the game is over
     public isGameOver(): boolean {
-        return this.gameOver || this.isBoardFull();
+        return this.isBoardFull();
     }
 
     public clone(): SimpleGame {
-        const newGame = new SimpleGame(this.boardSize);
+        const newGame = new SimpleGame(this.boardSize, this.players[0], this.players[1]);
         newGame.board = this.board.map((row) => [...row]);
         newGame.currentPlayer = this.currentPlayer;
         newGame.playerScores = [...this.playerScores];
         newGame.lastMoveScore = this.lastMoveScore;
         newGame.gameOver = this.gameOver;
         newGame.sosSequences = this.sosSequences.map((seq) => ({ ...seq }));
+        newGame.sosMessageShown = this.sosMessageShown;
         return newGame;
     }
 }

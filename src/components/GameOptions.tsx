@@ -1,6 +1,9 @@
 'use client'
 
 import React from 'react';
+import { Player } from 'game/Player';
+import { HumanPlayer } from 'game/HumanPlayer';
+import { ComputerPlayer } from 'game/ComputerPlayer';
 
 type GameOptionsProps = {
   boardSize: number;
@@ -13,6 +16,10 @@ type GameOptionsProps = {
   gameStarted: boolean;
   startGame: () => void;
   resetGame: () => void;
+  player1: Player;
+  player2: Player;
+  setPlayer1: (player: Player) => void;
+  setPlayer2: (player: Player) => void;
 }
 
 const GameOptions = ({
@@ -25,13 +32,25 @@ const GameOptions = ({
   setSelectedLetter,
   gameStarted,
   startGame,
-  resetGame
+  resetGame,
+  player1,
+  player2,
+  setPlayer1,
+  setPlayer2
 }: GameOptionsProps) => {
   
   const handleBoardSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const size = parseInt(e.target.value);
     if (size >= 3 && size <= 12) {
       setBoardSize(size);
+    }
+  };
+
+  const handlePlayerTypeChange = (playerNumber: number, type: 'human' | 'computer') => {
+    if (playerNumber === 1) {
+      setPlayer1(type === 'human' ? new HumanPlayer(1) : new ComputerPlayer(1));
+    } else {
+      setPlayer2(type === 'human' ? new HumanPlayer(2) : new ComputerPlayer(2));
     }
   };
 
@@ -80,12 +99,72 @@ const GameOptions = ({
         </div>
       </div>
 
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Player 1 Type</label>
+        <div className="flex space-x-4">
+          <label className="flex items-center text-gray-700">
+            <input
+              type="radio"
+              name="player1Type"
+              value="human"
+              checked={player1.getType() === 'human'}
+              onChange={() => handlePlayerTypeChange(1, 'human')}
+              disabled={gameStarted}
+              className="mr-2"
+            />
+            <span>Human</span>
+          </label>
+          <label className="flex items-center text-gray-700">
+            <input
+              type="radio"
+              name="player1Type"
+              value="computer"
+              checked={player1.getType() === 'computer'}
+              onChange={() => handlePlayerTypeChange(1, 'computer')}
+              disabled={gameStarted}
+              className="mr-2"
+            />
+            <span>Computer</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Player 2 Type</label>
+        <div className="flex space-x-4">
+          <label className="flex items-center text-gray-700">
+            <input
+              type="radio"
+              name="player2Type"
+              value="human"
+              checked={player2.getType() === 'human'}
+              onChange={() => handlePlayerTypeChange(2, 'human')}
+              disabled={gameStarted}
+              className="mr-2"
+            />
+            <span>Human</span>
+          </label>
+          <label className="flex items-center text-gray-700">
+            <input
+              type="radio"
+              name="player2Type"
+              value="computer"
+              checked={player2.getType() === 'computer'}
+              onChange={() => handlePlayerTypeChange(2, 'computer')}
+              disabled={gameStarted}
+              className="mr-2"
+            />
+            <span>Computer</span>
+          </label>
+        </div>
+      </div>
+
       {gameStarted && (
         <>
           <div className={`p-3 ${currentPlayer === 1 ? 'bg-blue-100' : 'bg-red-100'} rounded-lg`}>
             <p className="font-bold text-gray-700">Current Player: {currentPlayer}</p>
           </div>
-          
+
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">Select Letter</label>
             <div className="flex space-x-4">

@@ -1,7 +1,9 @@
 import { SOSGame } from "./SOSGame";
+import { Player } from "./Player";
+
 export class GeneralGame extends SOSGame {
-    constructor(boardSize: number) {
-        super(boardSize, "general");
+    constructor(boardSize: number, player1: Player, player2: Player) {
+        super(boardSize, "general", player1, player2);
     }
 
     public placeMove(
@@ -36,14 +38,19 @@ export class GeneralGame extends SOSGame {
 
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
-        if (this.lastMoveScore) {
+        if (this.lastMoveScore > 0) {
             this.playerScores[player - 1] += this.lastMoveScore;
+            // In general mode, player gets another turn if they make an SOS
         } else {
-            if (this.isBoardFull()) {
-                this.gameOver = true;
-            }
-            else {this.currentPlayer = player === 1 ? 2 : 1;}
+            // Only switch players if no SOS was formed
+            this.currentPlayer = player === 1 ? 2 : 1;
         }
+
+        // Check if game is over
+        if (this.isBoardFull()) {
+            this.gameOver = true;
+        }
+
         return true;
     }
 
@@ -53,7 +60,7 @@ export class GeneralGame extends SOSGame {
 
     // Clone the current game state
     public clone(): GeneralGame {
-        const newGame = new GeneralGame(this.boardSize);
+        const newGame = new GeneralGame(this.boardSize, this.players[0], this.players[1]);
         newGame.board = this.board.map((row) => [...row]);
         newGame.currentPlayer = this.currentPlayer;
         newGame.playerScores = [...this.playerScores];

@@ -1,3 +1,5 @@
+import { Player } from "./Player";
+
 export abstract class SOSGame {
     protected board: string[][];
     protected boardSize: number;
@@ -12,8 +14,9 @@ export abstract class SOSGame {
         player: number;
     }[];
     protected sosMessageShown: boolean;
+    protected players: [Player, Player];
 
-    constructor(boardSize: number, gameMode: string) {
+    constructor(boardSize: number, gameMode: string, player1: Player, player2: Player) {
         this.boardSize = boardSize;
         this.gameMode = gameMode;
         this.currentPlayer = 1;
@@ -22,6 +25,7 @@ export abstract class SOSGame {
         this.gameOver = false;
         this.sosSequences = [];
         this.sosMessageShown = false;
+        this.players = [player1, player2];
 
         // Initialize the empty board
         this.board = Array(boardSize)
@@ -198,5 +202,10 @@ export abstract class SOSGame {
     // Mark SOS message as shown
     public setSosMessageShown(): void {
         this.sosMessageShown = true;
+    }
+
+    // Get the current player object
+    public getCurrentPlayerObject(): Player {
+        return this.players[this.currentPlayer - 1];
     }
 }

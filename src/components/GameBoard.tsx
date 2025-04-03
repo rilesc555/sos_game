@@ -3,14 +3,16 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { GeneralGame } from 'game/GeneralGame'
 import { SimpleGame } from 'game/SimpleGame';
+import { SOSGame } from 'game/SOSGame';
 
 type GameBoardProps = {
   boardSize: number;
   gameState: SOSGame;
   handleCellClick: (row: number, col: number) => void;
+  isComputerMoving: boolean;
 }
 
-const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) => {
+const GameBoard = ({ boardSize, gameState, handleCellClick, isComputerMoving }: GameBoardProps) => {
   const board = gameState.getBoard();
   const [player1Score, player2Score] = gameState.getScores();
   const currentPlayer = gameState.getCurrentPlayer();
@@ -53,7 +55,7 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
     }
   }, [lastMoveScore, gameState, currentPlayer]);
 
-  // Draw SOS lines. This was weird
+  // Draw SOS lines
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -155,15 +157,16 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
             gridTemplateRows: `repeat(${boardSize}, ${cellSizePx}px)`
           }}
         >
-          {board.map((row, rowIndex) => 
+          {board.map((row: any[], rowIndex: number) => 
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={`flex items-center justify-center bg-white rounded cursor-pointer 
-                  ${!isGameOver && !cell ? 'hover:bg-blue-100' : ''} transition-colors`}
+                  ${!isGameOver && !cell && !isComputerMoving ? 'hover:bg-blue-100' : ''} 
+                  ${isComputerMoving ? 'opacity-50' : ''} transition-colors`}
                 style={{ width: `${cellSizePx}px`, height: `${cellSizePx}px` }}
                 onClick={() => {
-                  if (!isGameOver && handleCellClick) {
+                  if (!isGameOver && handleCellClick && !isComputerMoving) {
                     handleCellClick(rowIndex, colIndex);
                   }
                 }}
@@ -175,6 +178,13 @@ const GameBoard = ({ boardSize, gameState, handleCellClick }: GameBoardProps) =>
             ))
           )}
         </div>
+        {isComputerMoving && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10 rounded-lg">
+            <div className="text-lg font-bold text-gray-700">
+              Computer is thinking...
+            </div>
+          </div>
+        )}
       </div>
 
       {isGameOver && (

@@ -7,27 +7,69 @@ import { SOSGame } from 'game/SOSGame';
 import { GeneralGame } from 'game/GeneralGame';
 import { SimpleGame } from 'game/SimpleGame';
 import GameBoardPreview from '../components/GameBoardPreview';
+import { Player } from 'game/Player';
+import { HumanPlayer } from 'game/HumanPlayer';
+import { ComputerPlayer } from 'game/ComputerPlayer';
 
 export default function App() {
   // Game state
   const [gameState, setGameState] = useState<SOSGame | null>(null);
   const [boardSize, setBoardSize] = useState(6);
   const [gameMode, setGameMode] = useState('simple');
-  const [currentPlayer, setCurrentPlayer] = useState(1); // 1 or 2
+  const [currentPlayer, setCurrentPlayer] = useState(1);
   const [selectedLetter, setSelectedLetter] = useState('S');
   const [gameStarted, setGameStarted] = useState(false);
+  const [player1, setPlayer1] = useState<Player>(new HumanPlayer(1));
+  const [player2, setPlayer2] = useState<Player>(new HumanPlayer(2));
+  const [isComputerMoving, setIsComputerMoving] = useState(false);
 
   useEffect(() => {
     if (gameStarted) {
-      const game = gameMode === 'general' ? new GeneralGame(boardSize) : new SimpleGame(boardSize);
+      const game = gameMode === 'general' 
+        ? new GeneralGame(boardSize, player1, player2) 
+        : new SimpleGame(boardSize, player1, player2);
       setGameState(game);
       setCurrentPlayer(1);
     }
-  }, [gameStarted, boardSize, gameMode]);
+  }, [gameStarted, boardSize, gameMode, player1, player2]);
 
-  // Handle cell click for placing S or O. Now with callbacks!
+  // Handle computer moves
+  useEffect(() => {
+    if (!gameStarted || !gameState || isComputerMoving) return;
+
+    const currentPlayerObj = gameState.getCurrentPlayerObject();
+    if (currentPlayerObj.getType() === 'computer') {
+      setIsComputerMoving(true);
+      
+      const makeComputerMove = async () => {
+        try {
+          const move = await currentPlayerObj.makeMove(gameState);
+          if (move) {
+            const moveSuccess = gameState.placeMove(move.row, move.col, move.letter, currentPlayer);
+            if (moveSuccess) {
+              const newGameState = gameState.clone();
+              setGameState(newGameState);
+              
+              if (newGameState.getLastMoveScore() === 0 || gameMode === 'simple') {
+                setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+              }
+            }
+          }
+        } finally {
+          setIsComputerMoving(false);
+        }
+      };
+
+      makeComputerMove();
+    }
+  }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
+
+  // Handle cell click for placing S or O
   const handleCellClick = useCallback((row: number, col: number) => {
-    if (!gameState || gameState.getCell(row, col) !== '') return;
+    if (!gameState || gameState.getCell(row, col) !== '' || isComputerMoving) return;
+    
+    const currentPlayerObj = gameState.getCurrentPlayerObject();
+    if (currentPlayerObj.getType() === 'computer') return;
     
     const moveSuccess = gameState.placeMove(row, col, selectedLetter, currentPlayer);
     if (moveSuccess) {
@@ -40,7 +82,7 @@ export default function App() {
         setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
       }
     }
-  }, [gameState, selectedLetter, currentPlayer, gameMode]);
+  }, [gameState, selectedLetter, currentPlayer, gameMode, isComputerMoving]);
 
   // Start new game
   const startGame = useCallback(() => {
@@ -53,6 +95,7 @@ export default function App() {
     setGameState(null);
     setCurrentPlayer(1);
     setSelectedLetter('S');
+    setIsComputerMoving(false);
   }, []);
 
   // Board size handler
@@ -88,6 +131,10 @@ export default function App() {
             gameStarted={gameStarted}
             startGame={startGame}
             resetGame={resetGame}
+            player1={player1}
+            player2={player2}
+            setPlayer1={setPlayer1}
+            setPlayer2={setPlayer2}
           />
         </div>
         
@@ -98,6 +145,7 @@ export default function App() {
               boardSize={boardSize}
               gameState={gameState}
               handleCellClick={handleCellClick}
+              isComputerMoving={isComputerMoving}
             />
           ) : (
             <div className="flex flex-col items-center">
