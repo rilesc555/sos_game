@@ -40,7 +40,7 @@ export abstract class SOSGame {
         player: number
     ): boolean;
 
-    abstract isGameOver(): boolean;
+    protected abstract isGameOver(): boolean;
 
     abstract clone(): SOSGame;
 

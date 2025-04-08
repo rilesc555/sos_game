@@ -1,4 +1,4 @@
-import { Player } from "./Player";
+import { Player, Move } from "./Player";
 import { SOSGame } from "./SOSGame";
 
 export class HumanPlayer extends Player {
@@ -6,16 +6,16 @@ export class HumanPlayer extends Player {
         super(playerNumber);
     }
 
-    async makeMove(game: SOSGame): Promise<{row: number, col: number, letter: string}> {
+    async getMove(game: SOSGame): Promise<Move> {
         // Human moves are handled by the UI
         return new Promise(() => {});
     }
 
-    getType(): 'human' | 'computer' {
-        return 'human';
+    getType(): "human" | "computer" {
+        return "human";
     }
 
     getPlayerNumber(): number {
         return this.playerNumber;
     }
-} 
+}

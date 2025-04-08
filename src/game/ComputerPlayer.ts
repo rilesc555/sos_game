@@ -1,15 +1,20 @@
-import { Player } from "./Player";
+import { Move, Player } from "./Player";
 import { SOSGame } from "./SOSGame";
+import { GeneralGame } from "./GeneralGame";
 
 export class ComputerPlayer extends Player {
     constructor(playerNumber: number) {
         super(playerNumber);
     }
 
-    async makeMove(game: SOSGame): Promise<{row: number, col: number, letter: string}> {
-        // Get all available moves
-        const availableMoves = this.getAvailableMoves(game);
+    async getMove(game: SOSGame): Promise<Move> {
+        // Add a longer delay for computer moves in general game mode
+        const delay = game instanceof GeneralGame ? 1500 : 500;
+        await new Promise((resolve) => setTimeout(resolve, delay));
         
+        // Get all available moves
+        const availableMoves: Move[] = this.getAvailableMoves(game);
+
         // Try to find a winning move (completing an SOS)
         const winningMove = this.findWinningMove(game, availableMoves);
         if (winningMove) {
@@ -23,32 +28,40 @@ export class ComputerPlayer extends Player {
         }
 
         // If no strategic moves, make a random move
-        const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-        
-        // Add artificial delay to make it feel more natural
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const randomMove: Move =
+            availableMoves[Math.floor(Math.random() * availableMoves.length)];
+
         return randomMove;
     }
 
-    private getAvailableMoves(game: SOSGame): {row: number, col: number, letter: string}[] {
-        const moves: {row: number, col: number, letter: string}[] = [];
+    private getAvailableMoves(game: SOSGame): Move[] {
+        const moves: Move[] = [];
         const board = game.getBoard();
-        
+
         for (let row = 0; row < board.length; row++) {
             for (let col = 0; col < board[row].length; col++) {
-                if (board[row][col] === '') {
-                    moves.push({row, col, letter: 'S'});
-                    moves.push({row, col, letter: 'O'});
+                if (board[row][col] === "") {
+                    const oMove: Move = { row: row, column: col, letter: "O" };
+                    const sMove: Move = { row: row, column: col, letter: "S" };
+                    moves.push(oMove);
+                    moves.push(sMove);
                 }
             }
         }
         return moves;
     }
 
-    private findWinningMove(game: SOSGame, moves: {row: number, col: number, letter: string}[]): {row: number, col: number, letter: string} | null {
+    private findWinningMove(game: SOSGame, moves: Move[]): Move | null {
         for (const move of moves) {
             const gameCopy = game.clone();
-            if (gameCopy.placeMove(move.row, move.col, move.letter, this.playerNumber)) {
+            if (
+                gameCopy.placeMove(
+                    move.row,
+                    move.column,
+                    move.letter,
+                    this.playerNumber
+                )
+            ) {
                 if (gameCopy.getLastMoveScore() > 0) {
                     return move;
                 }
@@ -57,12 +70,19 @@ export class ComputerPlayer extends Player {
         return null;
     }
 
-    private findBlockingMove(game: SOSGame, moves: {row: number, col: number, letter: string}[]): {row: number, col: number, letter: string} | null {
+    private findBlockingMove(game: SOSGame, moves: Move[]): Move | null {
         const opponentNumber = this.playerNumber === 1 ? 2 : 1;
-        
+
         for (const move of moves) {
             const gameCopy = game.clone();
-            if (gameCopy.placeMove(move.row, move.col, move.letter, opponentNumber)) {
+            if (
+                gameCopy.placeMove(
+                    move.row,
+                    move.column,
+                    move.letter,
+                    opponentNumber
+                )
+            ) {
                 if (gameCopy.getLastMoveScore() > 0) {
                     return move;
                 }
@@ -70,4 +90,4 @@ export class ComputerPlayer extends Player {
         }
         return null;
     }
-} 
+}

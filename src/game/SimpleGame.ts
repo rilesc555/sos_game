@@ -38,31 +38,30 @@ export class SimpleGame extends SOSGame {
 
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
-        if (this.lastMoveScore > 0) {
-            this.playerScores[player - 1] += this.lastMoveScore;
-            // In simple mode, game ends when an SOS is formed
-            this.gameOver = true;
+        this.playerScores[player - 1] += this.lastMoveScore;
+
+        this.gameOver = this.isGameOver();
+
+        if (this.gameOver) {
             return true;
         }
-
-        // Update current player only if no SOS was formed
-        this.currentPlayer = player === 1 ? 2 : 1;
-
-        // Check if game is over
-        if (this.isBoardFull()) {
-            this.gameOver = true;
+        else {
+            this.currentPlayer = player === 1 ? 2 : 1;
+            return true;
         }
-
-        return true;
     }
 
     // Check if the game is over
-    public isGameOver(): boolean {
-        return this.isBoardFull();
+     protected isGameOver(): boolean {
+        return (this.lastMoveScore !== 0 || this.isBoardFull())
     }
 
     public clone(): SimpleGame {
-        const newGame = new SimpleGame(this.boardSize, this.players[0], this.players[1]);
+        const newGame = new SimpleGame(
+            this.boardSize,
+            this.players[0],
+            this.players[1]
+        );
         newGame.board = this.board.map((row) => [...row]);
         newGame.currentPlayer = this.currentPlayer;
         newGame.playerScores = [...this.playerScores];

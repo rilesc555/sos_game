@@ -38,6 +38,7 @@ export class GeneralGame extends SOSGame {
 
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
+
         if (this.lastMoveScore > 0) {
             this.playerScores[player - 1] += this.lastMoveScore;
             // In general mode, player gets another turn if they make an SOS
@@ -47,20 +48,22 @@ export class GeneralGame extends SOSGame {
         }
 
         // Check if game is over
-        if (this.isBoardFull()) {
-            this.gameOver = true;
-        }
+        this.gameOver = this.isGameOver();
 
         return true;
     }
 
-    public isGameOver(): boolean {
+    protected isGameOver(): boolean {
         return this.isBoardFull();
     }
 
     // Clone the current game state
     public clone(): GeneralGame {
-        const newGame = new GeneralGame(this.boardSize, this.players[0], this.players[1]);
+        const newGame = new GeneralGame(
+            this.boardSize,
+            this.players[0],
+            this.players[1]
+        );
         newGame.board = this.board.map((row) => [...row]);
         newGame.currentPlayer = this.currentPlayer;
         newGame.playerScores = [...this.playerScores];
