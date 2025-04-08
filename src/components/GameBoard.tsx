@@ -51,6 +51,7 @@ const GameBoard = ({ boardSize, gameState, handleCellClick, isComputerMoving }: 
         setAnimationType(null);
       }, animType === 'single' ? 600 : 1100); // Allow extra time for double animation
       
+      console.log("finishing animation");
       return () => clearTimeout(timer);
     }
   }, [lastMoveScore, gameState, currentPlayer]);

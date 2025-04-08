@@ -47,14 +47,15 @@ export default function App() {
         const currentPlayerObj = gameState.getCurrentPlayerObject();
         if (currentPlayerObj.getType() === "computer") {
             // Add a 1 second delay before the computer makes its move
+            console.log(`Computer player ${currentPlayer} is making a move...`);
             const delay = 1000;
             setIsComputerMoving(true);
 
             const makeComputerMove = async () => {
                 try {
                     // Wait for the delay before making the move
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    
+                    await new Promise((resolve) => setTimeout(resolve, delay));
+
                     const move = await currentPlayerObj.getMove(gameState);
                     if (move) {
                         const moveSuccess = gameState.placeMove(
@@ -81,12 +82,15 @@ export default function App() {
             };
 
             makeComputerMove();
+        } else {
+            console.log("for some reason this is a human moving?!");
         }
     }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
 
     // Handle cell click for placing S or O
     const handleCellClick = useCallback(
         (row: number, col: number) => {
+            console.log(`Trying to click on row ${row}, column ${col}`);
             if (
                 !gameState ||
                 gameState.getCell(row, col) !== "" ||
@@ -103,6 +107,7 @@ export default function App() {
                 selectedLetter,
                 currentPlayer
             );
+
             if (moveSuccess) {
                 // Create a new instance to trigger re-render
                 const newGameState = gameState.clone();
