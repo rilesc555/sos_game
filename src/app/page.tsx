@@ -9,10 +9,8 @@ import { SimpleGame } from "game/SimpleGame";
 import GameBoardPreview from "../components/GameBoardPreview";
 import { Player } from "game/Player";
 import { HumanPlayer } from "game/HumanPlayer";
-import { ComputerPlayer } from "game/ComputerPlayer";
 
 export default function App() {
-    // Game state
     const [gameState, setGameState] = useState<SOSGame | null>(null);
     const [boardSize, setBoardSize] = useState(6);
     const [gameMode, setGameMode] = useState("simple");
@@ -36,6 +34,7 @@ export default function App() {
 
     // Handle computer moves
     useEffect(() => {
+        debugger;
         if (
             !gameStarted ||
             !gameState ||
@@ -44,18 +43,22 @@ export default function App() {
         )
             return;
 
+        // console log the refs in order to see which triggered the rerender
+        console.log("GameState", gameState);
+        console.log("CurrentPlayer", currentPlayer);
+        console.log("GameStarted", gameStarted);
+        console.log("IsComputerMoving", isComputerMoving);
+        console.log("GameMode", gameMode);
+
         const currentPlayerObj = gameState.getCurrentPlayerObject();
         if (currentPlayerObj.getType() === "computer") {
-            // Add a 1 second delay before the computer makes its move
-            console.log(`Computer player ${currentPlayer} is making a move...`);
-            const delay = 1000;
-            setIsComputerMoving(true);
-
+            const delay = 500;
             const makeComputerMove = async () => {
                 try {
                     // Wait for the delay before making the move
                     await new Promise((resolve) => setTimeout(resolve, delay));
 
+                    setIsComputerMoving(true);
                     const move = await currentPlayerObj.getMove(gameState);
                     if (move) {
                         const moveSuccess = gameState.placeMove(
@@ -82,8 +85,6 @@ export default function App() {
             };
 
             makeComputerMove();
-        } else {
-            console.log("for some reason this is a human moving?!");
         }
     }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
 
@@ -132,11 +133,10 @@ export default function App() {
 
     // Reset game
     const resetGame = useCallback(() => {
+        debugger;
         setGameStarted(false);
         setGameState(null);
-        setCurrentPlayer(1);
-        setSelectedLetter("S");
-        setIsComputerMoving(false);
+        console.log("Game reset");
     }, []);
 
     // Board size handler

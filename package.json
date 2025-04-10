@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@simbathesailor/use-what-changed": "^2.0.0",
     "@types/bun": "latest",
     "@types/node": "^20",
     "@types/react": "^19",
