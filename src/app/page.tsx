@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import GameBoard from "../components/GameBoard";
 import GameOptions from "../components/GameOptions";
 import { SOSGame } from "game/SOSGame";
@@ -20,6 +20,7 @@ export default function App() {
     const [player1, setPlayer1] = useState<Player>(new HumanPlayer(1));
     const [player2, setPlayer2] = useState<Player>(new HumanPlayer(2));
     const [isComputerMoving, setIsComputerMoving] = useState(false);
+    const computerMoveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (gameStarted) {
@@ -34,61 +35,90 @@ export default function App() {
 
     // Handle computer moves
     useEffect(() => {
-        debugger;
+        const makeComputerMove = async () => {
+            computerMoveTimerRef.current = null;
+            let moveMade = false;
+            try {
+                const currentGameState = gameState;
         if (
             !gameStarted ||
-            !gameState ||
-            isComputerMoving ||
-            gameState.getGameOver()
-        )
+                    !currentGameState ||
+                    currentGameState.getGameOver()
+                ) {
+                    setIsComputerMoving(false);
             return;
-
-        // console log the refs in order to see which triggered the rerender
-        console.log("GameState", gameState);
-        console.log("CurrentPlayer", currentPlayer);
-        console.log("GameStarted", gameStarted);
-        console.log("IsComputerMoving", isComputerMoving);
-        console.log("GameMode", gameMode);
-
-        const currentPlayerObj = gameState.getCurrentPlayerObject();
-        if (currentPlayerObj.getType() === "computer") {
-            const delay = 500;
-            const makeComputerMove = async () => {
-                try {
-                    // Wait for the delay before making the move
-                    await new Promise((resolve) => setTimeout(resolve, delay));
-
+                }
                     setIsComputerMoving(true);
-                    const move = await currentPlayerObj.getMove(gameState);
+                moveMade = true;
+                const currentPlayerObj =
+                    currentGameState.getCurrentPlayerObject();
+                const move = await currentPlayerObj.getMove(currentGameState);
+
+                if (!gameStarted || !gameState || gameState.getGameOver()) {
+                    return;
+                }
+
                     if (move) {
-                        const moveSuccess = gameState.placeMove(
+                    const moveSuccess = currentGameState.placeMove(
                             move.row,
                             move.column,
                             move.letter,
                             currentPlayer
                         );
                         if (moveSuccess) {
-                            const newGameState: SOSGame = gameState.clone();
+                        const newGameState: SOSGame = currentGameState.clone();
                             setGameState(newGameState);
-
                             if (
                                 newGameState.getLastMoveScore() === 0 ||
                                 gameMode === "simple"
                             ) {
-                                setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
-                            }
+                            setCurrentPlayer((prev) => (prev === 1 ? 2 : 1));
                         }
+                    } else {
+                        moveMade = false;
+                        setIsComputerMoving(false);
                     }
-                } finally {
+                } else {
+                    moveMade = false;
                     setIsComputerMoving(false);
                 }
-            };
+            } catch (error) {
+                console.error("Error in computer move:", error);
+                moveMade = false;
+                setIsComputerMoving(false);
+            } finally {
+                if (moveMade) setIsComputerMoving(false);
+            }
+        };
 
-            makeComputerMove();
+        if (computerMoveTimerRef.current) {
+            clearTimeout(computerMoveTimerRef.current);
+            computerMoveTimerRef.current = null;
         }
+
+        if (
+            !gameStarted ||
+            !gameState ||
+            isComputerMoving ||
+            gameState.getGameOver()
+        ) {
+            return;
+        }
+
+        const currentPlayerObj = gameState.getCurrentPlayerObject();
+        if (currentPlayerObj.getType() === "computer") {
+            const delay = 500;
+            computerMoveTimerRef.current = setTimeout(makeComputerMove, delay) as unknown as NodeJS.Timeout;
+        }
+
+        return () => {
+            if (computerMoveTimerRef.current) {
+                clearTimeout(computerMoveTimerRef.current);
+                computerMoveTimerRef.current = null;
+        }
+        };
     }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
 
-    // Handle cell click for placing S or O
     const handleCellClick = useCallback(
         (row: number, col: number) => {
             console.log(`Trying to click on row ${row}, column ${col}`);
@@ -110,11 +140,9 @@ export default function App() {
             );
 
             if (moveSuccess) {
-                // Create a new instance to trigger re-render
                 const newGameState = gameState.clone();
                 setGameState(newGameState);
 
-                // If a player makes an SOS, they get another turn (except in simple mode)
                 if (
                     newGameState.getLastMoveScore() === 0 ||
                     gameMode === "simple"
@@ -126,30 +154,32 @@ export default function App() {
         [gameState, selectedLetter, currentPlayer, gameMode, isComputerMoving]
     );
 
-    // Start new game
     const startGame = useCallback(() => {
         setGameStarted(true);
     }, []);
 
-    // Reset game
     const resetGame = useCallback(() => {
-        debugger;
         setGameStarted(false);
-        setGameState(null);
-        console.log("Game reset");
+
+        if (computerMoveTimerRef.current) {
+            clearTimeout(computerMoveTimerRef.current);
+            computerMoveTimerRef.current = null;
+        }
+
+        setCurrentPlayer(1);
+        setSelectedLetter("S");
+
+        console.log("Game reset initiated.");
     }, []);
 
-    // Board size handler
     const handleBoardSizeChange = useCallback((size: number) => {
         setBoardSize(size);
     }, []);
 
-    // Game mode handler
     const handleGameModeChange = useCallback((mode: string) => {
         setGameMode(mode);
     }, []);
 
-    // Letter selection handler
     const handleLetterSelect = useCallback((letter: string) => {
         setSelectedLetter(letter);
     }, []);
