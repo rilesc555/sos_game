@@ -40,15 +40,15 @@ export default function App() {
             let moveMade = false;
             try {
                 const currentGameState = gameState;
-        if (
-            !gameStarted ||
+                if (
+                    !gameStarted ||
                     !currentGameState ||
                     currentGameState.getGameOver()
                 ) {
                     setIsComputerMoving(false);
-            return;
+                    return;
                 }
-                    setIsComputerMoving(true);
+                setIsComputerMoving(true);
                 moveMade = true;
                 const currentPlayerObj =
                     currentGameState.getCurrentPlayerObject();
@@ -58,20 +58,20 @@ export default function App() {
                     return;
                 }
 
-                    if (move) {
+                if (move) {
                     const moveSuccess = currentGameState.placeMove(
-                            move.row,
-                            move.column,
-                            move.letter,
-                            currentPlayer
-                        );
-                        if (moveSuccess) {
+                        move.row,
+                        move.column,
+                        move.letter,
+                        currentPlayer
+                    );
+                    if (moveSuccess) {
                         const newGameState: SOSGame = currentGameState.clone();
-                            setGameState(newGameState);
-                            if (
-                                newGameState.getLastMoveScore() === 0 ||
-                                gameMode === "simple"
-                            ) {
+                        setGameState(newGameState);
+                        if (
+                            newGameState.getLastMoveScore() === 0 ||
+                            gameMode === "simple"
+                        ) {
                             setCurrentPlayer((prev) => (prev === 1 ? 2 : 1));
                         }
                     } else {
@@ -108,14 +108,17 @@ export default function App() {
         const currentPlayerObj = gameState.getCurrentPlayerObject();
         if (currentPlayerObj.getType() === "computer") {
             const delay = 500;
-            computerMoveTimerRef.current = setTimeout(makeComputerMove, delay) as unknown as NodeJS.Timeout;
+            computerMoveTimerRef.current = setTimeout(
+                makeComputerMove,
+                delay
+            ) as unknown as NodeJS.Timeout;
         }
 
         return () => {
             if (computerMoveTimerRef.current) {
                 clearTimeout(computerMoveTimerRef.current);
                 computerMoveTimerRef.current = null;
-        }
+            }
         };
     }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
 
