@@ -2,6 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { SOSGame } from "game/SOSGame";
+import { HumanPlayer } from "game/HumanPlayer";
 
 type GameBoardProps = {
     boardSize: number;
@@ -191,7 +192,7 @@ const GameBoard = ({
                                 key={`${rowIndex}-${colIndex}`}
                                 className={`flex items-center justify-center bg-white rounded cursor-pointer 
                   ${
-                      !isGameOver && !cell && !isComputerMoving
+                      !isGameOver && !cell && (gameState.getCurrentPlayerObject() instanceof HumanPlayer)
                           ? "hover:bg-blue-100"
                           : ""
                   } 
@@ -204,7 +205,7 @@ const GameBoard = ({
                                     if (
                                         !isGameOver &&
                                         handleCellClick &&
-                                        !isComputerMoving
+                                        (gameState.getCurrentPlayerObject() instanceof HumanPlayer)
                                     ) {
                                         handleCellClick(rowIndex, colIndex);
                                     }

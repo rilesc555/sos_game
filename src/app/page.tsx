@@ -20,7 +20,7 @@ export default function App() {
     const [player1, setPlayer1] = useState<Player>(new HumanPlayer(1));
     const [player2, setPlayer2] = useState<Player>(new HumanPlayer(2));
     const [isComputerMoving, setIsComputerMoving] = useState(false);
-    const computerMoveTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const computerMoveTimerRef = useRef<Timer | null>(null);
 
     useEffect(() => {
         if (gameStarted) {
@@ -37,7 +37,6 @@ export default function App() {
     useEffect(() => {
         const makeComputerMove = async () => {
             computerMoveTimerRef.current = null;
-            let moveMade = false;
             try {
                 const currentGameState = gameState;
                 if (
@@ -49,12 +48,13 @@ export default function App() {
                     return;
                 }
                 setIsComputerMoving(true);
-                moveMade = true;
                 const currentPlayerObj =
                     currentGameState.getCurrentPlayerObject();
                 const move = await currentPlayerObj.getMove(currentGameState);
 
                 if (!gameStarted || !gameState || gameState.getGameOver()) {
+                    // Ensure state is reset if game ended during async operation
+                    setIsComputerMoving(false);
                     return;
                 }
 
@@ -75,19 +75,17 @@ export default function App() {
                             setCurrentPlayer((prev) => (prev === 1 ? 2 : 1));
                         }
                     } else {
-                        moveMade = false;
-                        setIsComputerMoving(false);
+                        setIsComputerMoving(false); // Keep this for immediate feedback if needed
                     }
                 } else {
-                    moveMade = false;
-                    setIsComputerMoving(false);
+                    setIsComputerMoving(false); // Keep this for immediate feedback if needed
                 }
             } catch (error) {
                 console.error("Error in computer move:", error);
-                moveMade = false;
-                setIsComputerMoving(false);
+                setIsComputerMoving(false); // Keep this for immediate feedback
             } finally {
-                if (moveMade) setIsComputerMoving(false);
+                // Always set isComputerMoving to false when the operation finishes
+                setIsComputerMoving(false);
             }
         };
 
@@ -108,10 +106,7 @@ export default function App() {
         const currentPlayerObj = gameState.getCurrentPlayerObject();
         if (currentPlayerObj.getType() === "computer") {
             const delay = 500;
-            computerMoveTimerRef.current = setTimeout(
-                makeComputerMove,
-                delay
-            ) as unknown as NodeJS.Timeout;
+            computerMoveTimerRef.current = setTimeout(makeComputerMove, delay);
         }
 
         return () => {
