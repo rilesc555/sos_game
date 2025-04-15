@@ -12,6 +12,43 @@ type GameBoardProps = {
     isComputerMoving: boolean;
 };
 
+const animateScoreUpdate = (
+    score: number,
+    prevScoreRef: React.RefObject<number>,
+    initialMountRef: React.RefObject<boolean>,
+    playerRef: React.RefObject<HTMLDivElement>
+) => {
+    if (initialMountRef.current) {
+        initialMountRef.current = false;
+        return;
+    }
+    const scoreDiff = score - prevScoreRef.current;
+    if (scoreDiff > 0 && playerRef.current) {
+        if (scoreDiff === 2) {
+            const animation = animate(
+                playerRef.current,
+                { scale: [1, 1.25, 1.1, 1.25, 1] }, // Keyframes: start -> peak1 -> dip -> peak2 -> end
+                {
+                    duration: 0.65, // Duration for one full double pulse cycle
+                    ease: "easeInOut",
+                    times: [0, 0.12, 0.24, 0.36, 1], // Timing for each keyframe
+                }
+            );
+        } else {
+            const animation = animate(
+                playerRef.current,
+                { scale: [1, 1.25, 1] },
+                {
+                    duration: 0.65 * 0.64,
+                    ease: "easeInOut",
+                    times: [0, 0.12, 1],
+                }
+            );
+        }
+        prevScoreRef.current = score;
+    }
+};
+
 const GameBoard = ({
     boardSize,
     gameState,
@@ -23,12 +60,13 @@ const GameBoard = ({
     const currentPlayer = gameState.getCurrentPlayer();
     const isGameOver = gameState.getGameOver();
     const winner = gameState.getWinner();
-    const player1Ref = useRef<HTMLDivElement>(null);
+    const player1Ref = useRef<HTMLDivElement>(null!);
+    const player2Ref = useRef<HTMLDivElement>(null!);
     const prevPlayer1ScoreRef = useRef(player1Score);
-    const player2Ref = useRef<HTMLDivElement>(null);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const prevPlayer2ScoreRef = useRef(player2Score);
     const isInitialMountPlayer1 = useRef(true);
     const isInitialMountPlayer2 = useRef(true);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // Calculate cell size based on board dimensions
     const cellSizePx = Math.min(60, 480 / boardSize);
@@ -36,44 +74,26 @@ const GameBoard = ({
 
     // Effect to animate player 1 when score changes
     useEffect(() => {
-        if (isInitialMountPlayer1.current) {
-            isInitialMountPlayer1.current = false;
-            return;
+        if (player1Ref.current) {
+            animateScoreUpdate(
+                player1Score,
+                prevPlayer1ScoreRef,
+                isInitialMountPlayer1,
+                player1Ref
+            );
         }
-        const scoreDiff = player1Score - prevPlayer1ScoreRef.current;
-        if (scoreDiff > 0 && player1Ref.current) {
-            console.log("Score difference: ", scoreDiff);
-            if (scoreDiff == 2) {
-                const animation = animate(
-                    player1Ref.current,
-                    { scale: [1, 1.25, 1.1, 1.25, 1] }, // Keyframes: start -> peak1 -> dip -> peak2 -> end
-                    {
-                        duration: 0.65, // Duration for one full double pulse cycle
-                        ease: "easeInOut",
-                        times: [0, 0.12, 0.24, 0.36, 1], // Timing for each keyframe
-                    }
-                );
-            } else {
-                const animation = animate(
-                    player1Ref.current,
-                    { scale: [1, 1.25, 1] },
-                    {
-                        duration: 0.65 * 0.64,
-                        ease: "easeInOut",
-                        times: [0, 0.12, 1],
-                    }
-                );
-            }
-            // const animation = animate(
-            //     player1Ref.current,
-            //     { scale: [1, 1.2, 1] },
-            //     { repeat: scoreDiff - 1, duration: 0.25 }
-            // );
-        }
-        prevPlayer1ScoreRef.current = player1Score;
-
-        return () => {};
     }, [player1Score]);
+
+    useEffect(() => {
+        if (player2Ref.current) {
+            animateScoreUpdate(
+                player2Score,
+                prevPlayer2ScoreRef,
+                isInitialMountPlayer2,
+                player2Ref
+            );
+        }
+    });
 
     // Draw SOS lines
     useEffect(() => {
