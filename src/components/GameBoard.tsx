@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import { SOSGame } from "game/SOSGame";
 import { HumanPlayer } from "game/HumanPlayer";
 
@@ -20,7 +20,6 @@ const GameBoard = ({
     const board = gameState.getBoard();
     const [player1Score, player2Score] = gameState.getScores();
     const currentPlayer = gameState.getCurrentPlayer();
-    const lastMoveScore = gameState.getLastMoveScore();
     const isGameOver = gameState.getGameOver();
     const winner = gameState.getWinner();
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -87,7 +86,7 @@ const GameBoard = ({
                     className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
             ${
                 currentPlayer === 2
-                    ? "text-blue-600 bg-blue-50 border-2 border-blue-200"
+                    ? "text-red-600 bg-red-50 border-2 border-red-200"
                     : "text-gray-600"
             }
             `}
