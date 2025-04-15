@@ -11,7 +11,7 @@ export class ComputerPlayer extends Player {
         // Add a longer delay for computer moves in general game mode
         const delay = game instanceof GeneralGame ? 1500 : 500;
         await new Promise((resolve) => setTimeout(resolve, delay));
-        
+
         // Get all available moves
         const availableMoves: Move[] = this.getAvailableMoves(game);
 
