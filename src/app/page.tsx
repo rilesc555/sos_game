@@ -145,7 +145,7 @@ export default function App() {
                     newGameState.getLastMoveScore() === 0 ||
                     gameMode === "simple"
                 ) {
-                    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+                    setCurrentPlayer(newGameState.getCurrentPlayer());
                 }
             }
         },
