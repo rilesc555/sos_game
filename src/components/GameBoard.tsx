@@ -46,11 +46,21 @@ const GameBoard = ({
             if (scoreDiff == 2) {
                 const animation = animate(
                     player1Ref.current,
-                    { scale: [1, 1.2, 1.1, 1.25, 1] }, // Keyframes: start -> peak1 -> dip -> peak2 -> end
+                    { scale: [1, 1.25, 1.1, 1.25, 1] }, // Keyframes: start -> peak1 -> dip -> peak2 -> end
                     {
-                        duration: 0.5, // Duration for one full double pulse cycle
+                        duration: 0.65, // Duration for one full double pulse cycle
                         ease: "easeInOut",
-                        times: [0, 0.25, 0.5, 0.75, 1], // Timing for each keyframe
+                        times: [0, 0.12, 0.24, 0.36, 1], // Timing for each keyframe
+                    }
+                );
+            } else {
+                const animation = animate(
+                    player1Ref.current,
+                    { scale: [1, 1.25, 1] },
+                    {
+                        duration: 0.65 * 0.64,
+                        ease: "easeInOut",
+                        times: [0, 0.12, 1],
                     }
                 );
             }
