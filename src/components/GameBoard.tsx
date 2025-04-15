@@ -190,10 +190,10 @@ const GameBoard = ({
                         row.map((cell, colIndex) => (
                             <div
                                 key={`${rowIndex}-${colIndex}`}
-                                className={`flex items-center justify-center bg-white rounded cursor-pointer 
+                                className={`flex items-center justify-center bg-white rounded 
                   ${
                       !isGameOver && !cell && (gameState.getCurrentPlayerObject() instanceof HumanPlayer)
-                          ? "hover:bg-blue-100"
+                          ? "cursor-pointer hover:bg-blue-100"
                           : ""
                   } 
                   ${isComputerMoving ? "opacity-50" : ""} transition-colors`}
