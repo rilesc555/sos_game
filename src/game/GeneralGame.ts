@@ -39,16 +39,18 @@ export class GeneralGame extends SOSGame {
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
 
+        // Check if game is over
+        this.gameOver = this.isGameOver();
+
         if (this.lastMoveScore > 0) {
             this.playerScores[player - 1] += this.lastMoveScore;
             // In general mode, player gets another turn if they make an SOS
         } else {
             // Only switch players if no SOS was formed
-            this.currentPlayer = player === 1 ? 2 : 1;
+            if (!this.gameOver) {
+                this.currentPlayer = player === 1 ? 2 : 1;
+            }
         }
-
-        // Check if game is over
-        this.gameOver = this.isGameOver();
 
         return true;
     }
