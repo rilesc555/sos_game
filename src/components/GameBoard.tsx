@@ -3,6 +3,7 @@
 import React, { useRef, useEffect } from "react";
 import { SOSGame } from "game/SOSGame";
 import { HumanPlayer } from "game/HumanPlayer";
+import { animate } from "motion";
 
 type GameBoardProps = {
     boardSize: number;
@@ -22,11 +23,36 @@ const GameBoard = ({
     const currentPlayer = gameState.getCurrentPlayer();
     const isGameOver = gameState.getGameOver();
     const winner = gameState.getWinner();
+    const player1Ref = useRef<HTMLDivElement>(null);
+    const prevPlayer1ScoreRef = useRef(player1Score);
+    const player2Ref = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const isInitialMountPlayer1 = useRef(true);
+    const isInitialMountPlayer2 = useRef(true);
 
     // Calculate cell size based on board dimensions
     const cellSizePx = Math.min(60, 480 / boardSize);
     const boardSizePx = cellSizePx * boardSize;
+
+    // Effect to animate player 1 when score changes
+    useEffect(() => {
+        if (isInitialMountPlayer1.current) {
+            isInitialMountPlayer1.current = false;
+            return;
+        }
+        const scoreDiff = player1Score - prevPlayer1ScoreRef.current;
+        if (scoreDiff > 0 && player1Ref.current) {
+            console.log("Score difference: ", scoreDiff);
+            const animation = animate(
+                player1Ref.current,
+                { opacity: [0, 1], scale: [1, 1.2, 1] },
+                { repeat: scoreDiff - 1 }
+            );
+        }
+        prevPlayer1ScoreRef.current = player1Score;
+
+        return () => {};
+    }, [player1Score]);
 
     // Draw SOS lines
     useEffect(() => {
@@ -71,6 +97,7 @@ const GameBoard = ({
         <div className="flex flex-col items-center space-y-4">
             <div className="flex justify-between items-center w-full max-w-md px-4">
                 <div
+                    ref={player1Ref}
                     className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
             ${
                 currentPlayer === 1
@@ -83,6 +110,7 @@ const GameBoard = ({
                 </div>
 
                 <div
+                    ref={player2Ref}
                     className={`text-lg font-bold px-4 py-2 rounded-lg transition-colors
             ${
                 currentPlayer === 2

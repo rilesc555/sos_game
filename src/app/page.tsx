@@ -114,7 +114,6 @@ export default function App() {
 
     const handleCellClick = useCallback(
         (row: number, col: number) => {
-            console.log(`Trying to click on row ${row}, column ${col}`);
             if (
                 !gameState ||
                 gameState.getCell(row, col) !== "" ||
