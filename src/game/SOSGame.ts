@@ -37,7 +37,6 @@ export abstract class SOSGame {
         row: number,
         col: number,
         letter: string,
-        player: number
     ): boolean;
 
     protected abstract isGameOver(): boolean;

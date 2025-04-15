@@ -6,12 +6,7 @@ export class GeneralGame extends SOSGame {
         super(boardSize, "general", player1, player2);
     }
 
-    public placeMove(
-        row: number,
-        col: number,
-        letter: string,
-        player: number
-    ): boolean {
+    public placeMove(row: number, col: number, letter: string): boolean {
         if (this.gameOver) {
             return false;
         }
@@ -43,12 +38,12 @@ export class GeneralGame extends SOSGame {
         this.gameOver = this.isGameOver();
 
         if (this.lastMoveScore > 0) {
-            this.playerScores[player - 1] += this.lastMoveScore;
+            this.playerScores[this.currentPlayer - 1] += this.lastMoveScore;
             // In general mode, player gets another turn if they make an SOS
         } else {
             // Only switch players if no SOS was formed
             if (!this.gameOver) {
-                this.currentPlayer = player === 1 ? 2 : 1;
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
             }
         }
 

@@ -14,7 +14,6 @@ export default function App() {
     const [gameState, setGameState] = useState<SOSGame | null>(null);
     const [boardSize, setBoardSize] = useState(6);
     const [gameMode, setGameMode] = useState("simple");
-    const [currentPlayer, setCurrentPlayer] = useState(1);
     const [selectedLetter, setSelectedLetter] = useState("S");
     const [gameStarted, setGameStarted] = useState(false);
     const [player1, setPlayer1] = useState<Player>(new HumanPlayer(1));
@@ -30,7 +29,6 @@ export default function App() {
                     ? new GeneralGame(boardSize, player1, player2)
                     : new SimpleGame(boardSize, player1, player2);
             setGameState(game);
-            setCurrentPlayer(1);
         }
     }, [gameStarted, boardSize, gameMode, player1, player2]);
 
@@ -60,21 +58,18 @@ export default function App() {
                 }
 
                 if (move) {
+                    // Get the player number *before* placing the move
+                    const playerMakingMove =
+                        currentGameState.getCurrentPlayer();
                     const moveSuccess = currentGameState.placeMove(
                         move.row,
                         move.column,
-                        move.letter,
-                        currentPlayer
+                        move.letter
                     );
                     if (moveSuccess) {
                         const newGameState: SOSGame = currentGameState.clone();
                         setGameState(newGameState);
-                        if (
-                            newGameState.getLastMoveScore() === 0 ||
-                            gameMode === "simple"
-                        ) {
-                            setCurrentPlayer((prev) => (prev === 1 ? 2 : 1));
-                        }
+                        // No need to set current player here anymore
                     } else {
                         setIsComputerMoving(false);
                     }
@@ -115,7 +110,7 @@ export default function App() {
                 computerMoveTimerRef.current = null;
             }
         };
-    }, [gameState, currentPlayer, gameMode, gameStarted, isComputerMoving]);
+    }, [gameState, gameMode, gameStarted, isComputerMoving]);
 
     const handleCellClick = useCallback(
         (row: number, col: number) => {
@@ -130,26 +125,14 @@ export default function App() {
             const currentPlayerObj = gameState.getCurrentPlayerObject();
             if (currentPlayerObj.getType() === "computer") return;
 
-            const moveSuccess = gameState.placeMove(
-                row,
-                col,
-                selectedLetter,
-                currentPlayer
-            );
+            const moveSuccess = gameState.placeMove(row, col, selectedLetter);
 
             if (moveSuccess) {
                 const newGameState = gameState.clone();
                 setGameState(newGameState);
-
-                if (
-                    newGameState.getLastMoveScore() === 0 ||
-                    gameMode === "simple"
-                ) {
-                    setCurrentPlayer(newGameState.getCurrentPlayer());
-                }
             }
         },
-        [gameState, selectedLetter, currentPlayer, gameMode, isComputerMoving]
+        [gameState, selectedLetter, isComputerMoving]
     );
 
     const startGame = useCallback(() => {
@@ -164,7 +147,6 @@ export default function App() {
             computerMoveTimerRef.current = null;
         }
 
-        setCurrentPlayer(1);
         setSelectedLetter("S");
 
         console.log("Game reset initiated.");
@@ -198,7 +180,7 @@ export default function App() {
                         setBoardSize={handleBoardSizeChange}
                         gameMode={gameMode}
                         setGameMode={handleGameModeChange}
-                        currentPlayer={currentPlayer}
+                        currentPlayer={gameState?.getCurrentPlayer() ?? 1}
                         selectedLetter={selectedLetter}
                         setSelectedLetter={handleLetterSelect}
                         gameStarted={gameStarted}

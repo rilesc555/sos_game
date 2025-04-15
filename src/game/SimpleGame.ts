@@ -6,12 +6,7 @@ export class SimpleGame extends SOSGame {
         super(boardSize, "simple", player1, player2);
     }
 
-    public placeMove(
-        row: number,
-        col: number,
-        letter: string,
-        player: number
-    ): boolean {
+    public placeMove(row: number, col: number, letter: string): boolean {
         if (this.gameOver) {
             return false;
         }
@@ -38,22 +33,21 @@ export class SimpleGame extends SOSGame {
 
         // Check for SOS formations and update score
         this.lastMoveScore = this.checkSOS(row, col);
-        this.playerScores[player - 1] += this.lastMoveScore;
+        this.playerScores[this.currentPlayer - 1] += this.lastMoveScore;
 
         this.gameOver = this.isGameOver();
 
         if (this.gameOver) {
             return true;
-        }
-        else {
-            this.currentPlayer = player === 1 ? 2 : 1;
+        } else {
+            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
             return true;
         }
     }
 
     // Check if the game is over
-     protected isGameOver(): boolean {
-        return (this.lastMoveScore !== 0 || this.isBoardFull())
+    protected isGameOver(): boolean {
+        return this.lastMoveScore !== 0 || this.isBoardFull();
     }
 
     public clone(): SimpleGame {
