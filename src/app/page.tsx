@@ -12,7 +12,7 @@ import { HumanPlayer } from "game/HumanPlayer";
 
 export default function App() {
     const [gameState, setGameState] = useState<SOSGame | null>(null);
-    const [boardSize, setBoardSize] = useState(6);
+    const [boardSize, setBoardSize] = useState(3);
     const [gameMode, setGameMode] = useState("simple");
     const [selectedLetter, setSelectedLetter] = useState("S");
     const [gameStarted, setGameStarted] = useState(false);

@@ -43,11 +43,22 @@ const GameBoard = ({
         const scoreDiff = player1Score - prevPlayer1ScoreRef.current;
         if (scoreDiff > 0 && player1Ref.current) {
             console.log("Score difference: ", scoreDiff);
-            const animation = animate(
-                player1Ref.current,
-                { opacity: [0, 1], scale: [1, 1.2, 1] },
-                { repeat: scoreDiff - 1 }
-            );
+            if (scoreDiff == 2) {
+                const animation = animate(
+                    player1Ref.current,
+                    { scale: [1, 1.2, 1.1, 1.25, 1] }, // Keyframes: start -> peak1 -> dip -> peak2 -> end
+                    {
+                        duration: 0.5, // Duration for one full double pulse cycle
+                        ease: "easeInOut",
+                        times: [0, 0.25, 0.5, 0.75, 1], // Timing for each keyframe
+                    }
+                );
+            }
+            // const animation = animate(
+            //     player1Ref.current,
+            //     { scale: [1, 1.2, 1] },
+            //     { repeat: scoreDiff - 1, duration: 0.25 }
+            // );
         }
         prevPlayer1ScoreRef.current = player1Score;
 
