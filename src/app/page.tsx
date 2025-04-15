@@ -22,6 +22,7 @@ export default function App() {
     const [isComputerMoving, setIsComputerMoving] = useState(false);
     const computerMoveTimerRef = useRef<Timer | null>(null);
 
+    // effect to start new game
     useEffect(() => {
         if (gameStarted) {
             const game =
@@ -33,7 +34,7 @@ export default function App() {
         }
     }, [gameStarted, boardSize, gameMode, player1, player2]);
 
-    // Handle computer moves
+    // Effect to handle computer moves
     useEffect(() => {
         const makeComputerMove = async () => {
             computerMoveTimerRef.current = null;
@@ -75,16 +76,15 @@ export default function App() {
                             setCurrentPlayer((prev) => (prev === 1 ? 2 : 1));
                         }
                     } else {
-                        setIsComputerMoving(false); // Keep this for immediate feedback if needed
+                        setIsComputerMoving(false);
                     }
                 } else {
-                    setIsComputerMoving(false); // Keep this for immediate feedback if needed
+                    setIsComputerMoving(false);
                 }
             } catch (error) {
                 console.error("Error in computer move:", error);
-                setIsComputerMoving(false); // Keep this for immediate feedback
+                setIsComputerMoving(false);
             } finally {
-                // Always set isComputerMoving to false when the operation finishes
                 setIsComputerMoving(false);
             }
         };
