@@ -16,11 +16,11 @@ export abstract class Player {
 
     abstract getMove(game: SOSGame): Promise<Move>;
 
-    getType(): "human" | "computer" {
+    public getType(): "human" | "computer" {
         return this instanceof HumanPlayer ? "human" : "computer";
     }
 
-    getPlayerNumber(): number {
+    public getPlayerNumber(): number {
         return this.playerNumber;
     }
 }

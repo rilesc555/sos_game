@@ -193,16 +193,6 @@ export abstract class SOSGame {
         return this.sosSequences;
     }
 
-    // Check if SOS message has been shown for the current move
-    public isSosMessageShown(): boolean {
-        return this.sosMessageShown;
-    }
-
-    // Mark SOS message as shown
-    public setSosMessageShown(): void {
-        this.sosMessageShown = true;
-    }
-
     // Get the current player object
     public getCurrentPlayerObject(): Player {
         return this.players[this.currentPlayer - 1];
