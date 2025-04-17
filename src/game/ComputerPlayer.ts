@@ -64,15 +64,22 @@ export class ComputerPlayer extends Player {
     }
 
     private findBlockingMove(game: SOSGame, moves: Move[]): Move | null {
-        const opponentNumber = this.playerNumber === 1 ? 2 : 1;
-
+        const safeMoves: Move[] = [];
         for (const move of moves) {
             const gameCopy = game.clone();
+            // check if the opponent can win after this move is played
             if (gameCopy.placeMove(move.row, move.column, move.letter)) {
-                if (gameCopy.getLastMoveScore() > 0) {
-                    return move;
+                const opponentWinningMove = this.findWinningMove(
+                    gameCopy,
+                    moves
+                );
+                if (!opponentWinningMove) {
+                    safeMoves.push(move);
                 }
             }
+        }
+        if (safeMoves.length > 0) {
+            return safeMoves[Math.floor(Math.random() * safeMoves.length)];
         }
         return null;
     }
