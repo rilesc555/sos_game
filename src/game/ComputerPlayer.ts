@@ -63,11 +63,11 @@ export class ComputerPlayer extends Player {
         return null;
     }
 
-    private async findBlockingMove(
+    private findBlockingMove(
         game: SOSGame,
         moves: Move[],
         nested: boolean = false
-    ): Promise<Move | null> {
+    ): Move | null {
         const safeMoves: Move[] = [];
         for (const move of moves) {
             const gameCopy = game.clone();
