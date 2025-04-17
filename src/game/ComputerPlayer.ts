@@ -54,14 +54,7 @@ export class ComputerPlayer extends Player {
     private findWinningMove(game: SOSGame, moves: Move[]): Move | null {
         for (const move of moves) {
             const gameCopy = game.clone();
-            if (
-                gameCopy.placeMove(
-                    move.row,
-                    move.column,
-                    move.letter,
-                    this.playerNumber
-                )
-            ) {
+            if (gameCopy.placeMove(move.row, move.column, move.letter)) {
                 if (gameCopy.getLastMoveScore() > 0) {
                     return move;
                 }
@@ -75,14 +68,7 @@ export class ComputerPlayer extends Player {
 
         for (const move of moves) {
             const gameCopy = game.clone();
-            if (
-                gameCopy.placeMove(
-                    move.row,
-                    move.column,
-                    move.letter,
-                    opponentNumber
-                )
-            ) {
+            if (gameCopy.placeMove(move.row, move.column, move.letter)) {
                 if (gameCopy.getLastMoveScore() > 0) {
                     return move;
                 }
