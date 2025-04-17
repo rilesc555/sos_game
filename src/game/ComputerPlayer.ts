@@ -63,7 +63,11 @@ export class ComputerPlayer extends Player {
         return null;
     }
 
-    private findBlockingMove(game: SOSGame, moves: Move[]): Move | null {
+    private async findBlockingMove(
+        game: SOSGame,
+        moves: Move[],
+        nested: boolean = false
+    ): Promise<Move | null> {
         const safeMoves: Move[] = [];
         for (const move of moves) {
             const gameCopy = game.clone();
@@ -76,6 +80,33 @@ export class ComputerPlayer extends Player {
                 if (!opponentWinningMove) {
                     safeMoves.push(move);
                 }
+            }
+        }
+        if (safeMoves.length > 0 && !nested) {
+            const doubleSafeMoves: Move[] = [];
+            for (const safeMove of safeMoves) {
+                const gameCopy = game.clone();
+                if (
+                    gameCopy.placeMove(
+                        safeMove.row,
+                        safeMove.column,
+                        safeMove.letter
+                    )
+                ) {
+                    const opponentBlockingMove = this.findBlockingMove(
+                        gameCopy,
+                        safeMoves,
+                        true
+                    );
+                    if (!opponentBlockingMove) {
+                        doubleSafeMoves.push(safeMove);
+                    }
+                }
+            }
+            if (doubleSafeMoves.length > 0) {
+                return doubleSafeMoves[
+                    Math.floor(Math.random() * doubleSafeMoves.length)
+                ];
             }
         }
         if (safeMoves.length > 0) {
