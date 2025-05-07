@@ -99,7 +99,7 @@ export default function App() {
         }
 
         const currentPlayerObj = gameState.getCurrentPlayerObject();
-        if (currentPlayerObj.getType() === "computer") {
+        if (currentPlayerObj.getType() !== "human") {
             const delay = 500;
             computerMoveTimerRef.current = setTimeout(makeComputerMove, delay);
         }
@@ -122,7 +122,7 @@ export default function App() {
                 return;
 
             const currentPlayerObj = gameState.getCurrentPlayerObject();
-            if (currentPlayerObj.getType() === "computer") return;
+            if (currentPlayerObj.getType() !== "human") return;
 
             const moveSuccess = gameState.placeMove(row, col, selectedLetter);
 

@@ -9,7 +9,7 @@ export class HumanPlayer extends Player {
         super(playerNumber);
     }
 
-    getType(): "human" | "computer" {
+    getIsHuman(): "human" | "computer" {
         return "human";
     }
 
