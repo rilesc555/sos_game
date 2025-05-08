@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createOpenAI, openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 
 const gemini_key = process.env.GEMINI_API_KEY;
+const openai_key = process.env.OPENAI_API_KEY;
+if (!openai_key) {
+    console.log("OPENAI_API_KEY is not defined in environment variables");
+}
 
 if (!gemini_key) {
     console.log("GEMINI_KEY is not defined in environment variables");
@@ -11,12 +16,13 @@ if (!gemini_key) {
 const google = createGoogleGenerativeAI({
     apiKey: gemini_key!,
 });
+const openaiClient = createOpenAI({
+    apiKey: openai_key!,
+});
 
 export async function POST(req: NextRequest) {
     try {
         const { prompt, board } = await req.json();
-
-        console.log("Prompt: ", prompt);
 
         const possibleMoves: string[] = [];
         for (let row = 0; row < board.length; row++) {
@@ -37,7 +43,7 @@ export async function POST(req: NextRequest) {
         }
 
         const result = await generateObject({
-            model: google("gemini-2.5-flash-preview-04-17"),
+            model: openai("gpt-4o-mini-2024-07-18"),
             output: "enum",
             enum: possibleMoves,
             prompt: `${prompt}`,
