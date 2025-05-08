@@ -1,7 +1,5 @@
 import { Move, Player } from "./Player";
-import { SOSGame } from "./SOSGame";
 import { GeneralGame } from "./GeneralGame";
-import { GoogleGenAI, Type } from "@google/genai";
 
 type aiResponse = {
     row: string;
@@ -10,13 +8,12 @@ type aiResponse = {
 };
 
 export class AiPlayer extends Player {
-    private genAI: GoogleGenAI;
-
     constructor(playerNumber: number) {
         super(playerNumber);
-        this.genAI = new GoogleGenAI({
-            apiKey: process.env.GENAI_API_KEY,
-        });
+    }
+
+    public getType(): "human" | "computer" | "ai" {
+        return "ai";
     }
 
     public createEnumofPossibleRows(board: string[][]): string[] {
@@ -27,51 +24,47 @@ export class AiPlayer extends Player {
         return rows;
     }
 
-    public parseMove(response: aiResponse): Move {
-        const row = parseInt(response.row);
-        const column = parseInt(response.column);
-        const letter = response.letter.toUpperCase();
-
-        if (isNaN(row) || isNaN(column) || !["S", "O"].includes(letter)) {
-            throw new Error("Invalid move");
+    // convert the response to a Move object
+    // response is a string of the format "R{row: int}C{column: int}L{S | O}"
+    public parseMove(response: string): Move {
+        const regex = /R(\d+)C(\d+)L([SO])/;
+        const match = response.match(regex);
+        if (!match) {
+            throw new Error("Invalid move format");
         }
+
+        const row = parseInt(match[1]);
+        const column = parseInt(match[2]);
+        const letter = match[3] as "S" | "O";
 
         return { row, column, letter };
     }
 
     async getMove(game: GeneralGame): Promise<Move> {
         const board = game.getBoard();
-        const prompt = `You are a player in a game of SOS. The current board is as follows:\n${board}\nYour move (row, column, letter):`;
-        const response = await this.genAI.models.generateContent({
-            model: "gemini-2.0-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        'row': {
-                            type: Type.STRING,
-                            nullable: false,
-                            enum: this.createEnumofPossibleRows(board),
-                        },
-                        'column': {
-                            type: Type.STRING,
-                            nullable: false,
-                            enum: this.createEnumofPossibleRows(board),
-                        },
-                        'letter': {
-                            type: Type.STRING,
-                            nullable: false,
-                            enum: ["S", "O"],
-                        },
-                    },
-                    required: ['row', 'column', 'letter'],
-                },
-            },
+        const board_length = board.length;
+        const prompt = `You are a player in a game of SOS. The goal is to form the word "SOS" on the board. You can place an "S" or an "O" in an empty cell. The size of the current board is ${board_length} The current board is as follows:\n${board}\n. Your move (row, column, letter):`;
+        const response = await fetch("/api/gemini", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                prompt,
+                board,
+            }),
         });
-        const debugResponse = response.toString();
+        const data = await response.json();
 
-        return this.parseMove(JSON.parse(debugResponse));
+        if (!response.ok) {
+            throw new Error(
+                `AI API Error: ${data.error || response.statusText}`
+            );
+        }
+
+        if (!data.result) {
+            throw new Error("AI API did not return a valid response");
+        }
+
+        // data.result is already an object of type aiResponse
+        return this.parseMove(data.result);
     }
 }

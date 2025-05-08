@@ -7,6 +7,10 @@ export class ComputerPlayer extends Player {
         super(playerNumber);
     }
 
+    public getType(): "human" | "computer" | "ai" {
+        return "computer";
+    }
+
     async getMove(game: SOSGame): Promise<Move> {
         // Add a longer delay for computer moves in general game mode
         const delay = game instanceof GeneralGame ? 1500 : 500;

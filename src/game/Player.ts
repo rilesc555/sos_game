@@ -1,5 +1,3 @@
-import { HumanPlayer } from "./HumanPlayer";
-import { ComputerPlayer } from "./ComputerPlayer";
 import { SOSGame } from "./SOSGame";
 
 export type Move = {
@@ -17,15 +15,7 @@ export abstract class Player {
 
     abstract getMove(game: SOSGame): Promise<Move>;
 
-    public getType(): "human" | "computer" | "ai" {
-        if (this instanceof HumanPlayer) {
-            return "human";
-        } else if (this instanceof ComputerPlayer) {
-            return "computer";
-        } else {
-            return "ai";
-        }
-    }
+    abstract getType(): "human" | "computer" | "ai";
 
     public getPlayerNumber(): number {
         return this.playerNumber;
