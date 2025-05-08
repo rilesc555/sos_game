@@ -18,8 +18,6 @@ export class AiPlayer extends Player {
         return rows;
     }
 
-    // convert the response to a Move object
-    // response is a string of the format "R{row: int}C{column: int}L{S | O}"
     public parseMove(response: string): Move {
         const regex = /R(\d+)C(\d+)L([SO])/;
         const match = response.match(regex);
@@ -67,7 +65,6 @@ export class AiPlayer extends Player {
             throw new Error("AI API did not return a valid response");
         }
 
-        // data.result is already an object of type aiResponse
         return this.parseMove(data.result);
     }
 }
