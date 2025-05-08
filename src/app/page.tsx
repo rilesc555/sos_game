@@ -100,7 +100,8 @@ export default function App() {
 
         const currentPlayerObj = gameState.getCurrentPlayerObject();
         if (currentPlayerObj.getType() !== "human") {
-            computerMoveTimerRef.current = setTimeout(makeComputerMove);
+            const delay = 500;
+            computerMoveTimerRef.current = setTimeout(makeComputerMove, delay);
         }
 
         return () => {
